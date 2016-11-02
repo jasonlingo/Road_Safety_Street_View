@@ -3,3 +3,6 @@ Use Google street view images to assist the research of road safety. Extract the
 
 Shapefile downloaded from following websites:
 - [OSM extracts for Bangkok](http://download.bbbike.org/osm/bbbike/Bangkok/): very detailed shapefile
+
+Tools:
+- [Shape file parser](http://mapshaper.org/)
