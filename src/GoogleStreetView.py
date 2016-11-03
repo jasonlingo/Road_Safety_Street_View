@@ -1,7 +1,8 @@
 import urllib
-import os
+import time
 from collections import namedtuple
 from Settings import GOOGLE_API_KEY
+
 
 
 class GoogleStreetView(object):
@@ -25,6 +26,7 @@ class GoogleStreetView(object):
         """
         requestUrl = cls.GOOGLE_STREET_VIEW_API % params
         urllib.urlretrieve(requestUrl, imgPathAndFilename)
+        time.sleep(0.1)  # prevent query too much in a short period of time
 
 
 class Coordinate(object):
@@ -33,14 +35,26 @@ class Coordinate(object):
     StreetViewParam = namedtuple("StreetViewParam", ["lat", "lng", "heading", "pov", "pitch"])
 
     @classmethod
-    def makeParam(cls, lat, lng, heading, fov=90, pitch=0):
+    def makeParameter(cls, lat, lng, heading, fov=90, pitch=0):
+        """
+        Make a StreetViewParam tuple according to the given values.
+        There is a default value for fov and pitch. If other value
+
+        :param lat: (float) latitude
+        :param lng: (float) longitude
+        :param heading: (float) the direction:
+                        0 or 360 = North; 90 = East; 180 = South; 270 = West
+        :param fov: (float) width of the view (0 - 120)
+        :param pitch: (float) up or down angle (0 - 90)
+        :return: a StreetViewParam tuple
+        """
         return cls.StreetViewParam(lat, lng, heading, fov, pitch)
 
-
-cwd = os.getcwd()
-filename = cwd + "/" + "test.jpg"
-coord = Coordinate.makeParam(46.414382, 10.013988, 151.78)
-GoogleStreetView.downloadStreetView(coord, filename)
-
+# ===== testing =====
+# cwd = os.getcwd()
+# filename = cwd + "/" + "test.jpg"
+# coord = Coordinate.makeParameter(46.414382, 10.013988, 150)
+# GoogleStreetView.downloadStreetView(coord, filename)
+# print coord
 
 
