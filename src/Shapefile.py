@@ -5,70 +5,86 @@ import os
 import webbrowser
 
 class ShapeType(object):
-    ALL = ""
+    ALL = ""  # 174974 records
 
-    BRIDLEWAY = "bridleway"
+    BRIDLEWAY = "bridleway"  # 4 records
 
-    CONSTRUCTION = "construction"
-    CYCLEWAY = "cycleway"
+    CONSTRUCTION = "construction"  # 310 records
+    CYCLEWAY = "cycleway"  # 252 records
 
-    ELEVATOR = "elevator"
+    ELEVATOR = "elevator"  # 4 records
 
-    FOOTWAY = "footway"
+    FOOTWAY = "footway"  # 5762 records
 
-    LIVING_STREET = "living_street"
+    LIVING_STREET = "living_street"  # 3542 records
 
-    MOTORWAY = "motorway"
-    MOTORWAY_LINK = "motorway_link"
+    MOTORWAY = "motorway"  # 812 records
+    MOTORWAY_LINK = "motorway_link"  # 2062
 
-    PATH = "path"
-    PEDESTRIAN = "pedestrian"
-    PLANNED = "planned"
-    PRIMARY = "primary"
-    PRIMARY_LINK = "primary_link"
-    PROPOSED = "proposed"
+    PATH = "path"  # 1794 records
+    PEDESTRIAN = "pedestrian"  # 378 records
+    PLANNED = "planned"  # 4 records
+    PRIMARY = "primary"  # 3678 records
+    PRIMARY_LINK = "primary_link"  # 1938 records
+    PROPOSED = "proposed"  # 4 records
 
-    RACEWAY = "raceway"
-    RESIDENTIAL = "residential"
-    ROAD = "road"
+    RACEWAY = "raceway"  # 14 records
+    RESIDENTIAL = "residential"  # 120238 records
+    ROAD = "road"  # 306 records
 
-    SECONDARY = "secondary"
-    SECONDARY_LINK = "secondary_link"
-    SERVICE = "service"
-    SERVICES = "services"
-    STEPS = "steps"
+    SECONDARY = "secondary" # 2404 records
+    SECONDARY_LINK = "secondary_link"  # 1304 records
+    SERVICE = "service"  # 19294 records
+    SERVICES = "services"  # 20 records
+    STEPS = "steps"  # 1242 records
 
-    TERTIARY = "tertiary"
-    TERTIARY_LINK = "tertiary_link"
-    TRACK = "track"
-    TRUNK = "trunk"
-    TRUNK_LINK = "trunk_link"
+    TERTIARY = "tertiary"  # 3186 records
+    TERTIARY_LINK = "tertiary_link"  # 694
+    TRACK = "track"  # 1018 records
+    TRUNK = "trunk"  # 594 records
+    TRUNK_LINK = "trunk_link"  # 634 records
 
-    UNCLASSIFIED = "unclassified"
+    UNCLASSIFIED = "unclassified"  # 3664 records
+
 
 
 class ShapeFileParser(object):
 
-    SHAPE_TYPE_INDEX = 3
-
-    def __init__(self, shapefile):
+    def __init__(self, shapefile, shapeTypeIdx):
+        """
+        :param shapefile: (str) the file name of the given shape file
+        :param shapeTypeIdx: (int) the index of the type store in the shape file
+        """
         self.shapefile = shapefile
+        self.shapeTypeIdx = shapeTypeIdx
         self.intersections = None
         self.shapeReader = shp.Reader(shapefile)
 
-    def getShapeTypePoints(self, type):
+    def getShapeTypePath(self, type):
         """
-        Get the intersection and find the center of each of them.
+        Get the points of paths for the given road types.
         :param type: (list of str) the target types
-        :return:
+        :return: a list of paths
         """
         return [sr.shape.points for sr in self.shapeReader.iterShapeRecords()
-                if sr.record[ShapeFileParser.SHAPE_TYPE_INDEX] in type or ShapeType.ALL in type]
+                if sr.record[self.shapeTypeIdx] in type or ShapeType.ALL in type]
 
 
 # ===== testing =====
-# file = "../shapefile/Bangkok-shp/shape/roads.shp"
+# file = "../shapefile/Bangkok-shp/shape/roads.dbf"
+# file = "../shapefile/thailand-latest-free.shp/gis.osm_roads_free_1.shp"
+# file = "../shapefile/bangkok_thailand.osm2pgsql-shapefiles/bangkok_thailand_osm_point.shp"
 # shpRead = ShapeFileParser(file)
+#
+# sread = shp.Reader(file)
+# roadType = set()
+# for sr in sread.iterRecords():
+#     print sr
+#     break
+#     roadType.add(sr[2])
+#
+# print roadType
+
 # types = []
 # types.append(ShapeType.ALL)
 # # types.append(ShapeType.ROAD)
@@ -84,9 +100,9 @@ class ShapeFileParser(object):
 #
 # points = shpRead.getShapeTypePoints(types)
 # print len(points)
-
-# find the center of the map
-# separate the first and last points of a road from other points
+#
+# # find the center of the map
+# # separate the first and last points of a road from other points
 # maxLat = -sys.maxint
 # minLat = sys.maxint
 # maxLng = -sys.maxint

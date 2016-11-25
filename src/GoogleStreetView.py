@@ -1,20 +1,38 @@
 import urllib
-import time
+import json
+import requests
 from collections import namedtuple
 from Settings import GOOGLE_API_KEY
+from pprint import pprint
 
 
 
 class GoogleStreetView(object):
 
     # the api request address
-    GOOGLE_STREET_VIEW_API = "https://maps.googleapis.com/maps/api/streetview?" \
+    STREET_IMAGE_API = "https://maps.googleapis.com/maps/api/streetview?" \
                              "size=640x640&" \
                              "location=%f,%f&" \
                              "heading=%f&" \
                              "pov=%f&" \
                              "pitch=%f&" \
                              "key=" + GOOGLE_API_KEY
+
+    # the metadata request address
+    METADATA_API = "https://maps.googleapis.com/maps/api/streetview/metadata?"
+                             # "size=640x640&" \
+                             # "location=%f,%f&" \
+                             # "heading=%f&" \
+                             # "pov=%f&" \
+                             # "pitch=%f&" \
+                             # "key=" + GOOGLE_API_KEY
+
+    @classmethod
+    def isValidPoint(cls, params):
+        response = requests.get(url=cls.METADATA_API, params=params)
+        data = json.loads(response.text)
+        return data["status"] == "OK"
+
 
     @classmethod
     def downloadStreetView(cls, params, imgPathAndFilename):
@@ -24,9 +42,8 @@ class GoogleStreetView(object):
         :param params: (tuple) lat, lng, heading, pov
         :param outputName: (str) the output path and file name
         """
-        requestUrl = cls.GOOGLE_STREET_VIEW_API % params
+        requestUrl = cls.STREET_IMAGE_API % params
         urllib.urlretrieve(requestUrl, imgPathAndFilename)
-        time.sleep(0.1)  # prevent query too much in a short period of time
 
 
 class Coordinate(object):
@@ -49,6 +66,19 @@ class Coordinate(object):
         :return: a StreetViewParam tuple
         """
         return cls.StreetViewParam(lat, lng, heading, fov, pitch)
+
+    @classmethod
+    def makeParameterDict(cls, lat, lng, heading, fov=90, pitch=0):
+        params = dict(
+            size="640x640",
+            location=str(lat) + "," + str(lng),
+            heading=str(heading),
+            fov=str(fov),
+            pitch=str(pitch),
+            key=GOOGLE_API_KEY
+        )
+        return params
+
 
 # ===== testing =====
 # cwd = os.getcwd()
