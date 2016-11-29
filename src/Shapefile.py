@@ -46,6 +46,39 @@ class ShapeType(object):
 
     UNCLASSIFIED = "unclassified"  # 3664 records
 
+    TYPES = set()
+    TYPES.add(BRIDLEWAY)
+    TYPES.add(CONSTRUCTION)
+    TYPES.add(CYCLEWAY)
+    TYPES.add(ELEVATOR)
+    TYPES.add(FOOTWAY)
+    TYPES.add(LIVING_STREET)
+    TYPES.add(MOTORWAY)
+    TYPES.add(MOTORWAY_LINK)
+    TYPES.add(PATH)
+    TYPES.add(PEDESTRIAN)
+    TYPES.add(PLANNED)
+    TYPES.add(PRIMARY)
+    TYPES.add(PRIMARY_LINK)
+    TYPES.add(PROPOSED)
+    TYPES.add(RACEWAY)
+    TYPES.add(RESIDENTIAL)
+    TYPES.add(ROAD)
+    TYPES.add(SECONDARY)
+    TYPES.add(SECONDARY_LINK)
+    TYPES.add(SERVICE)
+    TYPES.add(SERVICES)
+    TYPES.add(STEPS)
+    TYPES.add(TERTIARY)
+    TYPES.add(TERTIARY_LINK)
+    TYPES.add(TRACK)
+    TYPES.add(TRUNK)
+    TYPES.add(TRUNK_LINK)
+    TYPES.add(UNCLASSIFIED)
+
+    @classmethod
+    def getAllTypes(cls):
+        return [typ for typ in cls.TYPES]
 
 
 class ShapeFileParser(object):
@@ -67,7 +100,7 @@ class ShapeFileParser(object):
         :return: a list of paths
         """
         return [sr.shape.points for sr in self.shapeReader.iterShapeRecords()
-                if sr.record[self.shapeTypeIdx] in type or ShapeType.ALL in type]
+                if (sr.record[self.shapeTypeIdx] in type or ShapeType.ALL in type) and len(sr.shape.points) > 0]
 
 
 # ===== testing =====
