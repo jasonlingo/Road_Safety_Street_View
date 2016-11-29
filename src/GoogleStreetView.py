@@ -1,10 +1,10 @@
 import urllib
 import json
 import requests
+import time
 from collections import namedtuple
 from Settings import GOOGLE_API_KEY
-from pprint import pprint
-
+from config import OVER_QUERY_LIMIT, OK
 
 
 class GoogleStreetView(object):
@@ -27,12 +27,21 @@ class GoogleStreetView(object):
                              # "pitch=%f&" \
                              # "key=" + GOOGLE_API_KEY
 
+    # Google API query limit, query per second
+    TIME_TO_PAUSE_REQUEST = 5
+
+    queryTimes = 0
+
     @classmethod
     def isValidPoint(cls, params):
+        cls.timeToPause()
+
         response = requests.get(url=cls.METADATA_API, params=params)
         data = json.loads(response.text)
-        return data["status"] == "OK"
-
+        if data["status"] == OVER_QUERY_LIMIT:
+            print "OVER_QUERY_LIMIT!!!"
+            exit(0)
+        return data["status"] == OK
 
     @classmethod
     def downloadStreetView(cls, params, imgPathAndFilename):
@@ -42,9 +51,16 @@ class GoogleStreetView(object):
         :param params: (tuple) lat, lng, heading, pov
         :param outputName: (str) the output path and file name
         """
+        cls.timeToPause()
+
         requestUrl = cls.STREET_IMAGE_API % params
         urllib.urlretrieve(requestUrl, imgPathAndFilename)
 
+    @classmethod
+    def timeToPause(cls):
+        cls.queryTimes += 1
+        if cls.queryTimes == cls.TIME_TO_PAUSE_REQUEST:
+            time.sleep(1)
 
 class Coordinate(object):
 
