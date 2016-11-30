@@ -5,16 +5,14 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import httplib2
-import webbrowser
 import datetime
 from apiclient import errors
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
-from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client import client
 from oauth2client import tools
-from Settings import CLIENT_ID, CLIENT_SECRET_FILE
+from Settings import CLIENT_SECRET_FILE
 
 
 APPLICATION_NAME = 'Drive API'
@@ -24,6 +22,8 @@ try:
 except ImportError:
     flags = None
 
+# Check https://developers.google.com/drive/scopes for all available scopes.
+OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
 
 def GDriveUpload(imageList, folderName):
     """
@@ -37,26 +37,24 @@ def GDriveUpload(imageList, folderName):
     """
 
     # Get an authorization from Google Drive API.
-    # Check https://developers.google.com/drive/scopes for all available scopes.
-    OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
-
     # Redirect URI for installed apps.
     REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
 
-    # Run through the OAuth flow and retrieve credentials.
-    # flow = OAuth2WebServerFlow(CLIENT_ID, CLIENT_SECRET, OAUTH_SCOPE, redirect_uri=REDIRECT_URI)
-    flow = flow_from_clientsecrets(CLIENT_SECRET_FILE,
-                                   scope=OAUTH_SCOPE,
-                                   redirect_uri=REDIRECT_URI)
-    authorize_url = flow.step1_get_authorize_url()
-    print 'Go to the following link in your browser: ' + authorize_url
-
-    # Open a web page using the authorize_url to get an authorization code.
-    webbrowser.open_new(authorize_url)
-
-    # User inputs the authorization code.
-    code = raw_input('Enter verification code: ').strip()
-    credentials = flow.step2_exchange(code)
+    # # Run through the OAuth flow and retrieve credentials.
+    # # flow = OAuth2WebServerFlow(CLIENT_ID, CLIENT_SECRET, OAUTH_SCOPE, redirect_uri=REDIRECT_URI)
+    # flow = flow_from_clientsecrets(CLIENT_SECRET_FILE,
+    #                                scope=OAUTH_SCOPE,
+    #                                redirect_uri=REDIRECT_URI)
+    # authorize_url = flow.step1_get_authorize_url()
+    # print 'Go to the following link in your browser: ' + authorize_url
+    #
+    # # Open a web page using the authorize_url to get an authorization code.
+    # webbrowser.open_new(authorize_url)
+    #
+    # # User inputs the authorization code.
+    # code = raw_input('Enter verification code: ').strip()
+    # credentials = flow.step2_exchange(code)
+    credentials = get_credentials()
 
     # Create an httplib2.Http object and authorize it with our credentials.
     http = httplib2.Http()
@@ -100,7 +98,7 @@ def get_credentials():
     if not os.path.exists(credential_dir):
         os.makedirs(credential_dir)
     credential_path = os.path.join(credential_dir,
-                                   'drive-python-quickstart.json')
+                                   'drive-Python.json')
 
     store = Storage(credential_path)
     credentials = store.get()
@@ -192,6 +190,7 @@ def testDrive():
 
     links = GDriveUpload(imageNames, "TestUploader")
     print links
+    
 
 
 
