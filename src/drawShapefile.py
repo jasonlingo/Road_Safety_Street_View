@@ -6,62 +6,11 @@ from shapefileUtil import ShapeFileParser
 from shapefileUtil import ShapeType
 from settings import SHAPE_TYPE_INDEX
 from util import CustomedProgress
-from intersection import getSegmentsFromPath
-
-
-def drawMapFromSegments(filename):
-    print "Draw shapefile..."
-    shp = ShapeFileParser(filename, SHAPE_TYPE_INDEX)
-
-    types = []
-    types.append(ShapeType.PRIMARY)
-    allPaths = shp.getPathWithType(types)
-    centerLng, centerLat = findCenterFromPaths(allPaths)
-    allSegments = getSegmentsFromPath(allPaths)
-
-    plotSegmentOnMap(allSegments, centerLng, centerLat)
-
-
-def plotSegmentOnMap(allSegs, centerLng, centerLat):
-
-    def printFunc(n):
-        sys.stdout.write("\r%d" % n)
-    prog = CustomedProgress()
-    prog.setThreshold(1000)
-    prog.setPrintFunc(printFunc)
-
-    myMap = pygmaps.maps(centerLat, centerLng, 10)
-
-    colors = ["#ff3300", "#3333ff", "#0000", "#ff00ff", "#00e600", "#ff9900", "#66c2ff", "#ffff00"]
-    colorIdx = 0
-
-    for seg in allSegs:
-        prog.printProgress()
-        segPoint = getSegPoint(seg)
-        myMap.addpath(segPoint, colors[colorIdx])
-        # for point in seg.segment:
-        #     myMap.addpoint(point[1], point[0], colors[colorIdx])
-        colorIdx = (colorIdx + 1) % len(colors)
-
-    # create map file
-    mapFilename = "allPath.html"
-    myMap.draw('./' + mapFilename)
-
-    # Open the map file on a web browser.
-    url = "file://" + os.getcwd() + "/" + mapFilename
-    webbrowser.open_new(url)
-
-
-def getSegPoint(segment):
-    points = []
-    for point in segment.segment:
-        points.append((point[1], point[0]))
-    return points
 
 
 def drawShapefile(filename):
     print "Draw shapefile..."
-    shp = ShapeFileParser(filename, SHAPE_TYPE_INDEX)
+    shp = ShapeFileParser(filename)
 
     types = []
     types.append(ShapeType.ALL)
@@ -130,6 +79,15 @@ def getAllPathPoints(path):
     return allLngs, allLats
 
 
+def createMapHtmlandOpen(myMap, mapFilename):
+    # create map file
+    mapFilename = "%s.html" % mapFilename
+    myMap.draw('./' + mapFilename)
+
+    # Open the map file on a web browser.
+    url = "file://" + os.getcwd() + "/" + mapFilename
+    webbrowser.open_new(url)
+
+
 if __name__=="__main__":
     filename = "../shapefile/Bangkok-shp/shape/roads.shp"
-    drawMapFromSegments(filename)

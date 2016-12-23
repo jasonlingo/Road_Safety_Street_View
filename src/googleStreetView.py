@@ -4,7 +4,6 @@ import requests
 import time
 from collections import namedtuple
 from settings import GOOGLE_API_KEY
-from config import OVER_QUERY_LIMIT, OK
 
 
 class GoogleStreetView(object):
@@ -23,30 +22,27 @@ class GoogleStreetView(object):
 
     # the metadata request address
     METADATA_API = "https://maps.googleapis.com/maps/api/streetview/metadata?"
-                             # "size=640x640&" \
-                             # "location=%f,%f&" \
-                             # "heading=%f&" \
-                             # "pov=%f&" \
-                             # "pitch=%f&" \
-                             # "key=" + GOOGLE_API_KEY
 
     # Google API query limit, query per second
     TIME_TO_PAUSE_REQUEST = 9
 
     queryTimes = 0
 
+    # Google API Error code
+    OVER_QUERY_LIMIT = "OVER_QUERY_LIMIT"
+    OK = "OK"
+
     @classmethod
     def isValidPoint(cls, params):
         data = cls.getMetadata(params)
-        if data["status"] == OVER_QUERY_LIMIT:
+        if data["status"] == cls.OVER_QUERY_LIMIT:
             print "OVER_QUERY_LIMIT!!!"
             exit(0)
-        return data["status"] == OK
+        return data["status"] == cls.OK
 
     @classmethod
     def getMetadata(cls, params):
         cls.timeToPause()
-
         response = requests.get(url=cls.METADATA_API, params=params)
         return json.loads(response.text)
 
@@ -59,7 +55,6 @@ class GoogleStreetView(object):
         :param outputName: (str) the output path and file name
         """
         cls.timeToPause()
-
         requestUrl = cls.STREET_IMAGE_API % params
         urllib.urlretrieve(requestUrl, imgPathAndFilename)
 
@@ -97,13 +92,3 @@ class GoogleStreetView(object):
         :return: a StreetViewParam tuple
         """
         return cls.StreetViewParam(lat, lng, heading, fov, pitch)
-
-
-# ===== testing =====
-# cwd = os.getcwd()
-# filename = cwd + "/" + "test.jpg"
-# coord = Coordinate.makeParameter(46.414382, 10.013988, 150)
-# GoogleStreetView.downloadStreetView(coord, filename)
-# print coord
-
-

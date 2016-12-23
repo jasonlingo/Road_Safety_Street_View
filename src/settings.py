@@ -1,4 +1,3 @@
-from shapefileUtil import ShapeType
 
 # ===== Google API ==================================================
 GOOGLE_API_KEY = "AIzaSyABYQ8WlpRR_t17jKoZnkG6jCLzCSUBnnw"
@@ -30,7 +29,7 @@ SAMPLE_NUM = 50
 INIT_PICTURE_NUM = 1
 """Initial picture number"""
 
-TARGET_ROAD_TYPES = []
-TARGET_ROAD_TYPES.append(ShapeType.ALL)
+ALLOWED_DEGREE = 20
+"""The limitation on the angle of two segments to prevent intersection points from the same path"""
 
 

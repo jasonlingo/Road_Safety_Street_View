@@ -1,7 +1,6 @@
 from shapefileUtil import ShapeFileParser
 from shapefileUtil import ShapeType
 from settings import SHAPE_FILE
-from settings import SHAPE_TYPE_INDEX
 from main import getEndPoint
 from main import getValidEndPoint
 from main import removeDuplicatePoint
@@ -15,7 +14,7 @@ def preprocessEndPoints(types):
     for type in types:
         print "======================="
         print "processing", type
-        shapefile = ShapeFileParser(SHAPE_FILE, SHAPE_TYPE_INDEX)
+        shapefile = ShapeFileParser(SHAPE_FILE)
 
         print "parsing shape file"
         paths = shapefile.getShapeTypePath([type])

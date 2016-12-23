@@ -1,4 +1,3 @@
-import random
 import os
 import sys
 import pygmaps
@@ -6,9 +5,8 @@ import webbrowser
 import numpy as np
 from math import sin, radians, cos, asin, sqrt, atan2, pi
 from config import HEADINGS
-from GoogleStreetView import GoogleStreetView
-
-EARTH_RADIUS_KM = 6371.0
+from config import EARTH_RADIUS_KM
+from googleStreetView import GoogleStreetView
 
 
 class CustomedProgress(object):
@@ -118,58 +116,6 @@ def makeDirectory(directory):
     """
     if not os.path.exists(directory):
         os.makedirs(directory)
-
-
-def sampleAndDownloadStreetImage(endPoints, sampleNum, picNum, targetDirectory):
-    """
-    Randomly select end points from the endPoint collection.
-    For each selected end point, call Google map street view image api
-    to get the street view images.
-    :return:
-    """
-    print "download street images..."
-    sampledPoints = random.sample(endPoints, sampleNum) if sampleNum < len(endPoints) else endPoints
-    sampleData = []  # store (picture number, file name, lat and lng)
-    progress = Progress(10)
-    numStep = len(HEADINGS)
-    for point in sampledPoints:
-        progress.printProgress()
-        result = downloadSurroundingStreetView(point, targetDirectory, picNum)
-        sampleData += result
-        picNum += numStep
-    print ""
-    return sampleData
-
-
-def downloadSurroundingStreetView(point, directory, picNum):
-    """
-    Call Google street view image api to get the four surrounding images at the
-    given point.
-    :param point: (float, float) longitude and latitude
-    :param directory: the directory for saving the images
-    """
-    # googleMapAddr = "https://www.google.com/maps/@%s,%s,15z"
-    result = []
-    for heading in HEADINGS:
-        filename = "%s/%010d_%s_%s_%s.jpg" % (directory, picNum, str(point[1]), str(point[0]), heading[0])
-        paramDict = GoogleStreetView.makeParameterDict(point[1], point[0], heading[1])
-        metadata = GoogleStreetView.getMetadata(paramDict)
-        try:
-            result.append([picNum,
-                           str(point[1]),
-                           str(point[0]),
-                           str(point[1]) + "," + str(point[0]),
-                           heading[0],
-                           metadata["date"],
-                           filename.split("/")[-1]]
-                          )
-        except:
-            print sys.exc_traceback
-            print metadata
-        param = GoogleStreetView.makeParameter(point[1], point[0], heading[1])
-        GoogleStreetView.downloadStreetView(param, filename)
-        picNum += 1
-    return result
 
 
 def readPointFile(filename):

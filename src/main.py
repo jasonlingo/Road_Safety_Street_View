@@ -1,28 +1,16 @@
+import sys
+import random
 from settings import SAMPLE_NUM
 from settings import STREET_VIEW_DIRECTORY
-from settings import TARGET_ROAD_TYPES
-from settings import SHAPE_FILE
-from settings import SHAPE_TYPE_INDEX
 from settings import CSV_FILENAME
 from settings import INIT_PICTURE_NUM
+from config import HEADINGS
 from shapefileUtil import ShapeType
-from shapefileUtil import ShapeFileParser
 from csv import outputCSV
-from util import *
-
-
-# def sampleImage():
-#     """
-#     Get some sample images for each road types.
-#     """
-#     types = ShapeType.getAllTypes()
-#     for type in types:
-#         filename = "../end_points/" + type + ".data"
-#         targetDirectory = "../street_views/" + type + "/"
-#         makeDirectory(targetDirectory)
-#         points = readPointFile(filename)
-#         sampleAndDownloadStreetImage(points, 8, 1, targetDirectory)
-
+from util import readPointFile
+from util import makeDirectory
+from util import Progress
+from googleStreetView import GoogleStreetView
 
 def getValidEndPointFromFile(roadTypes):
     validEndPoints = []
@@ -30,6 +18,58 @@ def getValidEndPointFromFile(roadTypes):
         filename = "../end_points/%s.data" % rdType
         validEndPoints += readPointFile(filename)
     return validEndPoints
+
+
+def sampleAndDownloadStreetImage(endPoints, sampleNum, picNum, targetDirectory):
+    """
+    Randomly select end points from the endPoint collection.
+    For each selected end point, call Google map street view image api
+    to get the street view images.
+    :return:
+    """
+    print "download street images..."
+    sampledPoints = random.sample(endPoints, sampleNum) if sampleNum < len(endPoints) else endPoints
+    sampleData = []  # store (picture number, file name, lat and lng)
+    progress = Progress(10)
+    numStep = len(HEADINGS)
+    for point in sampledPoints:
+        progress.printProgress()
+        result = downloadSurroundingStreetView(point, targetDirectory, picNum)
+        sampleData += result
+        picNum += numStep
+    print ""
+    return sampleData
+
+
+def downloadSurroundingStreetView(point, directory, picNum):
+    """
+    Call Google street view image api to get the four surrounding images at the
+    given point.
+    :param point: (float, float) longitude and latitude
+    :param directory: the directory for saving the images
+    """
+    # googleMapAddr = "https://www.google.com/maps/@%s,%s,15z"
+    result = []
+    for heading in HEADINGS:
+        filename = "%s/%010d_%s_%s_%s.jpg" % (directory, picNum, str(point[1]), str(point[0]), heading[0])
+        paramDict = GoogleStreetView.makeParameterDict(point[1], point[0], heading[1])
+        metadata = GoogleStreetView.getMetadata(paramDict)
+        try:
+            result.append([picNum,
+                           str(point[1]),
+                           str(point[0]),
+                           str(point[1]) + "," + str(point[0]),
+                           heading[0],
+                           metadata["date"],
+                           filename.split("/")[-1]]
+                          )
+        except:
+            print sys.exc_traceback
+            print metadata
+        param = GoogleStreetView.makeParameter(point[1], point[0], heading[1])
+        GoogleStreetView.downloadStreetView(param, filename)
+        picNum += 1
+    return result
 
 
 def main():
@@ -50,22 +90,6 @@ def main():
 
     # plot images map
     # plotSampledPointMap(sampledPoints, "map")
-
-
-# def checkPhotoDate():
-#     directory = "../end_points"
-#     types = ShapeType.getAllTypes()
-#     shapefile = ShapeFileParser(SHAPE_FILE, SHAPE_TYPE_INDEX)
-#     shapeRecord = shapefile.getShapeRecord()
-#     typePoints = {}
-#     for sr in shapeRecord:
-#         if sr.record
-#
-#
-#     for sr in shapeRecord:
-#         print sr.record
-#         print sr.shape.points
-
 
 
 if __name__ == "__main__":
