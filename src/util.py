@@ -3,9 +3,30 @@ import os
 import sys
 import pygmaps
 import webbrowser
+import numpy as np
+from math import sin, radians, cos, asin, sqrt, atan2, pi
 from config import HEADINGS
 from GoogleStreetView import GoogleStreetView
-from GoogleStreetView import Coordinate
+
+EARTH_RADIUS_KM = 6371.0
+
+
+class CustomedProgress(object):
+
+    def __init__(self):
+        self.count = 0
+
+    def setThreshold(self, num):
+        self.threshold = num
+
+    def setPrintFunc(self, func):
+        self.printFunc = func
+
+    def printProgress(self):
+        self.count += 1
+        if self.count == self.threshold:
+            self.printFunc(self.count)
+            self.count = 0
 
 
 def getEndPoint(path):
@@ -39,7 +60,7 @@ def isValidPoint(point):
     of the street view image for the given point.
     :return:
     """
-    params = Coordinate.makeParameterDict(point[1], point[0], HEADINGS[0][1])
+    params = GoogleStreetView.makeParameterDict(point[1], point[0], HEADINGS[0][1])
     return GoogleStreetView.isValidPoint(params)
 
 
@@ -127,12 +148,25 @@ def downloadSurroundingStreetView(point, directory, picNum):
     :param point: (float, float) longitude and latitude
     :param directory: the directory for saving the images
     """
-    googleMapAddr = "https://www.google.com/maps/@%s,%s,15z"
+    # googleMapAddr = "https://www.google.com/maps/@%s,%s,15z"
     result = []
     for heading in HEADINGS:
         filename = "%s/%010d_%s_%s_%s.jpg" % (directory, picNum, str(point[1]), str(point[0]), heading[0])
-        result.append( [picNum, str(point[1]), str(point[0]), str(point[1]) + "," + str(point[0]), heading[0], filename.split("/")[-1]] )
-        param = Coordinate.makeParameter(point[1], point[0], heading[1])
+        paramDict = GoogleStreetView.makeParameterDict(point[1], point[0], heading[1])
+        metadata = GoogleStreetView.getMetadata(paramDict)
+        try:
+            result.append([picNum,
+                           str(point[1]),
+                           str(point[0]),
+                           str(point[1]) + "," + str(point[0]),
+                           heading[0],
+                           metadata["date"],
+                           filename.split("/")[-1]]
+                          )
+        except:
+            print sys.exc_traceback
+            print metadata
+        param = GoogleStreetView.makeParameter(point[1], point[0], heading[1])
         GoogleStreetView.downloadStreetView(param, filename)
         picNum += 1
     return result
@@ -163,3 +197,52 @@ class Progress(object):
         if self.count == self.freq:
             self.count = 0
             print ".",
+
+
+def haversine(point1, point2):
+    """
+    Calculate the great circle distance between two points
+    on the earth (specified in decimal degrees)
+
+    Args:
+      (tuple) poitn1: the position of the first point
+      (tuple) point2: the position of the second point
+    Return:
+      (float) distance (in km) between two nodes
+    """
+    # Convert decimal degrees to radians
+    lng1, lat1 = point1
+    lng2, lat2 = point2
+    lng1, lat1, lng2, lat2 = map(radians, [lng1, lat1, lng2, lat2])
+
+    # haversine formula
+    dlng = lng2 - lng1
+    dlat = lat2 - lat1
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlng / 2) ** 2
+    c = 2 * asin(sqrt(a))
+
+    return c * EARTH_RADIUS_KM
+
+
+def calcVectAngle(segment1, segment2):
+    """
+    Calculate the clock-wise angle between two vectors.
+    :param vec1: (float, float) the first vector that is used as the starting point for
+                 the angle.
+    :param vec2: (float, float) the second vector
+    """
+    vec1 = getVecFromSegment(segment1)
+    vec2 = getVecFromSegment(segment2)
+    angle = atan2(vec1[0], vec1[1]) - atan2(vec2[0], vec2[1])
+    angle = angle * 360 / (2 * pi)
+    if angle < 0:
+        angle += 360
+    return angle
+
+
+def getVecFromSegment(segment):
+    p1 = np.array(segment[0])
+    p2 = np.array(segment[1])
+    return p1 - p2
+
+

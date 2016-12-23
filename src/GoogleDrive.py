@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import sys
 import os
-
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import httplib2
@@ -12,7 +11,7 @@ from googleapiclient.http import MediaFileUpload
 from oauth2client.file import Storage
 from oauth2client import client
 from oauth2client import tools
-from Settings import CLIENT_SECRET_FILE
+from settings import CLIENT_SECRET_FILE
 
 
 APPLICATION_NAME = 'Drive API'

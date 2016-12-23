@@ -6,7 +6,7 @@ from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
-from Settings import CLIENT_ID, CLIENT_SECRET_FILE
+from settings import CLIENT_ID, CLIENT_SECRET_FILE
 
 
 try:

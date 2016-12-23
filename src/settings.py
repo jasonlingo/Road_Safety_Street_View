@@ -1,7 +1,7 @@
-from Shapefile import ShapeType
+from shapefileUtil import ShapeType
 
 # ===== Google API ==================================================
-GOOGLE_API_KEY = "AIzaSyCpbl6sA8-g3MKYzSdWaQvAZV05UW8urNI"
+GOOGLE_API_KEY = "AIzaSyABYQ8WlpRR_t17jKoZnkG6jCLzCSUBnnw"
 """Google Maps api key"""
 
 NO_IMAGE_FILE_NAME = "../img/NO_IMAGE.jpg"
@@ -24,13 +24,13 @@ STREET_VIEW_DIRECTORY = "../street_views"
 CSV_FILENAME = STREET_VIEW_DIRECTORY + "/samples.csv"
 
 # ===== Settings ====================================================
-SAMPLE_NUM = 10
+SAMPLE_NUM = 50
 """total number of samples"""
 
 INIT_PICTURE_NUM = 1
 """Initial picture number"""
 
 TARGET_ROAD_TYPES = []
-TARGET_ROAD_TYPES.append(ShapeType.UNCLASSIFIED)
+TARGET_ROAD_TYPES.append(ShapeType.ALL)
 
 

@@ -4,6 +4,7 @@ import sys
 import os
 import webbrowser
 
+
 class ShapeType(object):
     ALL = ""  # 174974 records
 
@@ -93,80 +94,29 @@ class ShapeFileParser(object):
         self.intersections = None
         self.shapeReader = shp.Reader(shapefile)
 
-    def getShapeTypePath(self, type):
+    def getShapeTypePath(self, types):
         """
         Get the points of paths for the given road types.
         :param type: (list of str) the target types
         :return: a list of paths
         """
         return [sr.shape.points for sr in self.shapeReader.iterShapeRecords()
-                if (sr.record[self.shapeTypeIdx] in type or ShapeType.ALL in type) and len(sr.shape.points) > 0]
+                if (sr.record[self.shapeTypeIdx] in types or ShapeType.ALL in types) and len(sr.shape.points) > 0]
+
+    def getPathWithType(self, types):
+        paths = []
+        for sr in self.shapeReader.iterShapeRecords():
+            curtType = sr.record[self.shapeTypeIdx]
+            if (curtType in types or ShapeType.ALL in types) and len(sr.shape.points) > 0:
+                paths.append(Path(curtType, sr.shape.points))
+        return paths
+
+    def getShapeRecord(self):
+        return self.shapeReader.shapeRecords()
 
 
-# ===== testing =====
-# file = "../shapefile/Bangkok-shp/shape/roads.dbf"
-# file = "../shapefile/thailand-latest-free.shp/gis.osm_roads_free_1.shp"
-# file = "../shapefile/bangkok_thailand.osm2pgsql-shapefiles/bangkok_thailand_osm_point.shp"
-# shpRead = ShapeFileParser(file)
-#
-# sread = shp.Reader(file)
-# roadType = set()
-# for sr in sread.iterRecords():
-#     print sr
-#     break
-#     roadType.add(sr[2])
-#
-# print roadType
+class Path(object):
 
-# types = []
-# types.append(ShapeType.ALL)
-# # types.append(ShapeType.ROAD)
-# # types.append(ShapeType.MOTORWAY)
-# # types.append(ShapeType.MOTORWAY_LINK)
-# # types.append(ShapeType.PATH)
-# # types.append(ShapeType.PRIMARY)
-# # types.append(ShapeType.PRIMARY_LINK)
-# # types.append(ShapeType.SECONDARY)
-# # types.append(ShapeType.SECONDARY_LINK)
-# # types.append(ShapeType.TERTIARY)
-# # types.append(ShapeType.TERTIARY_LINK)
-#
-# points = shpRead.getShapeTypePoints(types)
-# print len(points)
-#
-# # find the center of the map
-# # separate the first and last points of a road from other points
-# maxLat = -sys.maxint
-# minLat = sys.maxint
-# maxLng = -sys.maxint
-# minLng = sys.maxint
-# endPoint = []
-# middlePoint = []
-# for point in points:
-#     for i, p in enumerate(point):
-#         maxLat = max(maxLat, p[1])
-#         minLat = min(minLat, p[1])
-#         maxLng = max(maxLng, p[0])
-#         minLng = min(minLng, p[0])
-#         if i == 0 or i == len(point):
-#             endPoint.append(p)
-#         else:
-#             middlePoint.append(p)
-#
-# centerLat = (maxLat + minLat) / 2.0
-# centerLng = (maxLng + minLng) / 2.0
-#
-# # plot map
-# mymap = pygmaps.maps(centerLat, centerLng, 12)
-#
-# for point in endPoint:
-#     mymap.addpoint(point[1], point[0], "#00FF00")
-# # for point in middlePoint:
-# #     mymap.addpoint(point[1], point[0], "#0000FF")
-#
-# mapFilename = "shapefileMap.html"
-# mymap.draw('./' + mapFilename)
-#
-# # Open the map file on a web browser.
-# url = "file://" + os.getcwd() + "/" + mapFilename
-# webbrowser.open_new(url)
+    def __init__(self, type, points):
+        self.type = type
+        self.points = points
