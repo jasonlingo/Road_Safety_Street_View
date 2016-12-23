@@ -3,11 +3,14 @@ import json
 import requests
 import time
 from collections import namedtuple
-from Settings import GOOGLE_API_KEY
+from settings import GOOGLE_API_KEY
 from config import OVER_QUERY_LIMIT, OK
 
 
 class GoogleStreetView(object):
+
+    # For passing the parameters to the API
+    StreetViewParam = namedtuple("StreetViewParam", ["lat", "lng", "heading", "pov", "pitch"])
 
     # the api request address
     STREET_IMAGE_API = "https://maps.googleapis.com/maps/api/streetview?" \
@@ -28,20 +31,24 @@ class GoogleStreetView(object):
                              # "key=" + GOOGLE_API_KEY
 
     # Google API query limit, query per second
-    TIME_TO_PAUSE_REQUEST = 5
+    TIME_TO_PAUSE_REQUEST = 9
 
     queryTimes = 0
 
     @classmethod
     def isValidPoint(cls, params):
-        cls.timeToPause()
-
-        response = requests.get(url=cls.METADATA_API, params=params)
-        data = json.loads(response.text)
+        data = cls.getMetadata(params)
         if data["status"] == OVER_QUERY_LIMIT:
             print "OVER_QUERY_LIMIT!!!"
             exit(0)
         return data["status"] == OK
+
+    @classmethod
+    def getMetadata(cls, params):
+        cls.timeToPause()
+
+        response = requests.get(url=cls.METADATA_API, params=params)
+        return json.loads(response.text)
 
     @classmethod
     def downloadStreetView(cls, params, imgPathAndFilename):
@@ -61,11 +68,19 @@ class GoogleStreetView(object):
         cls.queryTimes += 1
         if cls.queryTimes == cls.TIME_TO_PAUSE_REQUEST:
             time.sleep(1)
+            cls.queryTimes = 0
 
-class Coordinate(object):
-
-    # For passing the parameters to the API
-    StreetViewParam = namedtuple("StreetViewParam", ["lat", "lng", "heading", "pov", "pitch"])
+    @classmethod
+    def makeParameterDict(cls, lat, lng, heading, fov=90, pitch=0):
+        params = dict(
+            size="640x640",
+            location=str(lat) + "," + str(lng),
+            heading=str(heading),
+            fov=str(fov),
+            pitch=str(pitch),
+            key=GOOGLE_API_KEY
+        )
+        return params
 
     @classmethod
     def makeParameter(cls, lat, lng, heading, fov=90, pitch=0):
@@ -82,18 +97,6 @@ class Coordinate(object):
         :return: a StreetViewParam tuple
         """
         return cls.StreetViewParam(lat, lng, heading, fov, pitch)
-
-    @classmethod
-    def makeParameterDict(cls, lat, lng, heading, fov=90, pitch=0):
-        params = dict(
-            size="640x640",
-            location=str(lat) + "," + str(lng),
-            heading=str(heading),
-            fov=str(fov),
-            pitch=str(pitch),
-            key=GOOGLE_API_KEY
-        )
-        return params
 
 
 # ===== testing =====

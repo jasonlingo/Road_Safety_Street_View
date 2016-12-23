@@ -1,7 +1,7 @@
-from Shapefile import ShapeFileParser
-from Shapefile import ShapeType
-from Settings import SHAPE_FILE
-from Settings import SHAPE_TYPE_INDEX
+from shapefileUtil import ShapeFileParser
+from shapefileUtil import ShapeType
+from settings import SHAPE_FILE
+from settings import SHAPE_TYPE_INDEX
 from main import getEndPoint
 from main import getValidEndPoint
 from main import removeDuplicatePoint
@@ -25,7 +25,7 @@ def preprocessEndPoints(types):
         print "end points: %d" % len(endPoints)
 
         print "getting valid points"
-        endPoints = getValidEndPoint(endPoints[100000:])
+        endPoints = getValidEndPoint(endPoints)
         print "valid points: %d" % len(endPoints)
 
         # output to file
@@ -38,7 +38,6 @@ def preprocessEndPoints(types):
         file.close()
 
 
-# if __name__ == "__main__":
-#     types = []
-#     types.append(ShapeType.RESIDENTIAL)
-#     preprocessEndPoints(types)
+if __name__ == "__main__":
+    types = ShapeType.getAllTypes()
+    preprocessEndPoints(types)
