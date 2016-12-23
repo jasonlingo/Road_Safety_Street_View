@@ -1,8 +1,6 @@
 import shapefile as shp
-import pygmaps
-import sys
-import os
-import webbrowser
+from settings import SHAPE_TYPE_INDEX
+from pathSegment import Path
 
 
 class ShapeType(object):
@@ -84,13 +82,13 @@ class ShapeType(object):
 
 class ShapeFileParser(object):
 
-    def __init__(self, shapefile, shapeTypeIdx):
+    def __init__(self, shapefile):
         """
         :param shapefile: (str) the file name of the given shape file
         :param shapeTypeIdx: (int) the index of the type store in the shape file
         """
         self.shapefile = shapefile
-        self.shapeTypeIdx = shapeTypeIdx
+        self.shapeTypeIdx = SHAPE_TYPE_INDEX
         self.intersections = None
         self.shapeReader = shp.Reader(shapefile)
 
@@ -113,10 +111,3 @@ class ShapeFileParser(object):
 
     def getShapeRecord(self):
         return self.shapeReader.shapeRecords()
-
-
-class Path(object):
-
-    def __init__(self, type, points):
-        self.type = type
-        self.points = points
