@@ -1,12 +1,15 @@
 from __future__ import division
 
+import sys
 import math
+import time
 import pygmaps
 from config import HEADINGS
 from shapefileUtil import ShapeFileParser
 from shapefileUtil import ShapeType
 from googleStreetView import GoogleStreetView
 from util import getMapCenter
+from util import Logger
 from pathSegment import Intersection
 from pathSegment import PathSegment
 from pathSegment import getSegmentPoint
@@ -18,39 +21,33 @@ from drawShapefile import createMapHtmlandOpen
 COLORS = ["#ff3300", "#3333ff", "#0000", "#ff00ff", "#00e600", "#ff9900", "#66c2ff", "#ffff00"]
 
 
-def findIntersectionByGrid(shp, types, regionNum):
+
+def findIntersection(allPaths, allSegments, regionNum):
     """
     Divide the map into grids and register each segment to the grids that it expands.
     Find the intersections by checking each segment with nearby segments.
     :param shp: ShapefileParser
     :param types: list of type
     :param regionNum: the number of grids on the shorter edge of the map
+    :param mapName: the name for the generated google map
     """
-    allPaths = shp.getPathWithType(types)
-    allSegments = getSegmentsFromPath(allPaths)
-
+    # create grids
     maxLng, minLng, maxLat, minLat = getMinMaxLatLng(allPaths)
     grids, unitLen = genGrids(maxLng, minLng, maxLat, minLat, regionNum)
     insertSegments(grids, unitLen, minLng, minLat, allSegments)
 
-    print "all segments: %d" % len(allSegments)
-
+    # find intersections using the grid method
     intersections = findIntersectionFromGrids(grids, unitLen, minLng, minLat, allSegments)
-    print "intersections: %d" % len(intersections)
+    Logger.printAndWrite("Intersections before checking: %d" % len(intersections))
 
-    # validPoints = []
-    # for point in intersections.keys():
-    #     param = GoogleStreetView.makeParameterDict(point[1], point[0], HEADINGS[0])
-    #     if GoogleStreetView.isValidPoint(param):
-    #         validPoints.append(point)
-    #
-    # print "total points: %d" % len(validPoints)
+    validIntersections = findValidIntersections(intersections)
+    Logger.printAndWrite("\nValid intersections: %d" % len(validIntersections))
 
-    plotPointAndSegment(intersections.keys(), allSegments, "grid_segment_noCheck_motorway")
+    return validIntersections
 
 
 def getSegmentsFromPath(allPaths):
-    print "Get segments from paths"
+    Logger.printAndWrite("Extracting segments from paths...")
 
     allSegments = []
     for path in allPaths:
@@ -63,6 +60,8 @@ def getSegmentsFromPath(allPaths):
 
 
 def genGrids(maxLng, minLng, maxLat, minLat, regionDiv):
+    Logger.printAndWrite("Generating grids...")
+
     lngDiff = maxLng - minLng
     latDiff = maxLat - minLat
     unitLen = min(lngDiff, latDiff) / regionDiv
@@ -145,6 +144,8 @@ def getPathPoint(points):
 
 
 def findIntersectionFromGrids(grids, unitLen, minLng, minLat, allSegments):
+    Logger.printAndWrite("Finding intersections...")
+
     intersections = {}
     for pathSeg in allSegments:
         candidatePathSeg = findCandidatePathSeg(grids, unitLen, minLng, minLat, pathSeg)
@@ -172,13 +173,77 @@ def findCandidatePathSeg(grids, unitLen, minLng, minLat, pathSeg):
     return candidates
 
 
+def findValidIntersections(intersections):
+    Logger.printAndWrite("Checking valid intersections")
+
+    start = 260000
+    delta = 10000
+    msg = "Starting record = %d" % start
+    Logger.printAndWrite(msg)
+
+    validIntersections = {}
+    i = 0
+    for point in intersections.keys()[start:start + delta]:
+        param = GoogleStreetView.makeParameterDict(point[1], point[0], HEADINGS[0])
+        if GoogleStreetView.isValidPoint(param):
+            validIntersections[point] = intersections[point]
+        i += 1
+        if i % 10 == 0:
+            sys.stdout.write("\r%d" % i)
+    return validIntersections
+
+
+def outputPointsToFile(intersections, filename):
+    output = open(filename, 'a')
+    lines = []
+    for inter in intersections.values():
+        line = []
+        line.append((str(inter.point[0]) + "," + str(inter.point[1])))
+        for seg in inter.segments:
+            line.append(seg.type)
+        line = "|".join(line)
+        lines.append(line)
+
+        if len(lines) >= 10:
+            outputLines(output, lines)
+            lines = []
+    if lines:
+        outputLines(output, lines)
+
+    output.close()
+
+def outputLines(file, lines):
+    result = "\n".join(lines)
+    result += "\n"
+    file.writelines(result)
+
+
 if __name__=="__main__":
+    Logger.writeLog("-----------------------------")
+
+    startTime = time.time()
+
+    Logger.printAndWrite("Starting time: " + time.ctime(startTime))
+
     filename = "../shapefile/Bangkok-shp/shape/roads.shp"
     shp = ShapeFileParser(filename)
 
     types = []
-    types.append(ShapeType.MOTORWAY)
+    types.append(ShapeType.ALL)
+    allPaths = shp.getPathWithType(types)
+    allSegments = getSegmentsFromPath(allPaths)
+
+    Logger.printAndWrite("All segments: %d" % len(allSegments))
 
     regionNum = 1000
+    validIntersections = findIntersection(allPaths, allSegments, regionNum)
 
-    findIntersectionByGrid(shp, types, regionNum)
+    outputFilename = "../validIntersectionPoints.data"
+    outputPointsToFile(validIntersections, outputFilename)
+
+    mapName = "all_intersection"
+    plotPointAndSegment(validIntersections.keys(), allSegments, mapName)
+
+    endTime = time.time()
+    Logger.printAndWrite("Ending time: " + time.ctime(endTime))
+    Logger.printAndWrite("Total time used: %f sec." % (time.time() - startTime))

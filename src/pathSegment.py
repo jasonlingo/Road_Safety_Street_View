@@ -1,7 +1,7 @@
 from __future__ import division
 import sys
 from util import calcVectAngle
-from settings import ALLOWED_DEGREE
+from settings import PATH_DEGREE
 from util import haversine
 
 
@@ -9,7 +9,7 @@ class Intersection(object):
 
     def __init__(self, point):
         self.point = point
-        self.pathPoints = set()
+        # self.pathPoints = set()
         self.segments = set()
 
 
@@ -21,11 +21,6 @@ class Path(object):
 
 
 class PathSegment(object):
-
-    LIMIT_ANGLE1 = ALLOWED_DEGREE
-    LIMIT_ANGLE2 = 360 - ALLOWED_DEGREE
-    LIMIT_ANGLE3 = 180 - ALLOWED_DEGREE
-    LIMIT_ANGLE4 = 180 + ALLOWED_DEGREE
 
     def __init__(self, type, point1, point2):
         self.type = type
@@ -40,7 +35,7 @@ class PathSegment(object):
     @classmethod
     def isValidAngle(cls, segment1, segment2):
         angle = calcVectAngle(segment1, segment2)
-        if angle <= cls.LIMIT_ANGLE1 or angle >= cls.LIMIT_ANGLE2 or (cls.LIMIT_ANGLE3 <= angle <= cls.LIMIT_ANGLE4):
+        if smallAngle(angle):
             return False
         else:
             return True
@@ -80,6 +75,15 @@ class PathSegment(object):
         y = det(d, ydiff) / div
         return (x, y)
 
+
+
+LIMIT_ANGLE1 = PATH_DEGREE
+LIMIT_ANGLE2 = 360 - PATH_DEGREE
+LIMIT_ANGLE3 = 180 - PATH_DEGREE
+LIMIT_ANGLE4 = 180 + PATH_DEGREE
+
+def smallAngle(angle):
+    return angle <= LIMIT_ANGLE1 or angle >= LIMIT_ANGLE2 or (LIMIT_ANGLE3 <= angle <= LIMIT_ANGLE4)
 
 def nearbyPoints(mainPoint, points, dist):
     nearPointNum = 0

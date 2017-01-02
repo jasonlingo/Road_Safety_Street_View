@@ -27,6 +27,27 @@ class CustomedProgress(object):
             self.count = 0
 
 
+class Logger(object):
+
+    # default log file name
+    filename = "log.txt"
+
+    @classmethod
+    def setLogFile(cls, filename):
+        cls.filename = filename
+
+    @classmethod
+    def writeLog(cls, msg):
+        log = open(cls.filename, 'a')
+        log.write(msg + "\n")
+        log.close()
+
+    @classmethod
+    def printAndWrite(cls, msg):
+        print msg
+        cls.writeLog(msg)
+
+
 def getEndPoint(path):
     """
     Extract the end points (first and last) from each list of points

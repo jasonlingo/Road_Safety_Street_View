@@ -1,6 +1,6 @@
 
 # ===== Google API ==================================================
-GOOGLE_API_KEY = "AIzaSyABYQ8WlpRR_t17jKoZnkG6jCLzCSUBnnw"
+GOOGLE_API_KEY = "AIzaSyCpbl6sA8-g3MKYzSdWaQvAZV05UW8urNI"
 """Google Maps api key"""
 
 NO_IMAGE_FILE_NAME = "../img/NO_IMAGE.jpg"
@@ -29,7 +29,7 @@ SAMPLE_NUM = 50
 INIT_PICTURE_NUM = 1
 """Initial picture number"""
 
-ALLOWED_DEGREE = 20
+PATH_DEGREE = 30
 """The limitation on the angle of two segments to prevent intersection points from the same path"""
 
 
