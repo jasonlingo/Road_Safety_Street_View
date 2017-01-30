@@ -4,7 +4,6 @@ import webbrowser
 import pygmaps
 from shapefileUtil import ShapeFileParser
 from shapefileUtil import ShapeType
-from settings import SHAPE_TYPE_INDEX
 from util import CustomedProgress
 
 

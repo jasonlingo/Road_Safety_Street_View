@@ -180,17 +180,3 @@ def insert_file(service, title, description, parent_id, mime_type, filename):
     except errors.HttpError, error:
         print 'An error occured: %s' % error
         return None
-
-
-def testDrive():
-    imageNames = []
-    imageNames.append("../street_views/1.jpg")
-    imageNames.append("../street_views/2.jpg")
-
-    links = GDriveUpload(imageNames, "TestUploader")
-    print links
-    
-
-
-
-testDrive()

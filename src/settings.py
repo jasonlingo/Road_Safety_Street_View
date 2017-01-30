@@ -1,6 +1,6 @@
 
 # ===== Google API ==================================================
-GOOGLE_API_KEY = "AIzaSyCpbl6sA8-g3MKYzSdWaQvAZV05UW8urNI"
+GOOGLE_API_KEY = "AIzaSyDBni3ing7ysqOkGN-E_c82SdDDvtpVdXg"
 """Google Maps api key"""
 
 NO_IMAGE_FILE_NAME = "../img/NO_IMAGE.jpg"
@@ -23,7 +23,7 @@ STREET_VIEW_DIRECTORY = "../street_views"
 CSV_FILENAME = STREET_VIEW_DIRECTORY + "/samples.csv"
 
 # ===== Settings ====================================================
-SAMPLE_NUM = 50
+SAMPLE_NUM = 1500
 """total number of samples"""
 
 INIT_PICTURE_NUM = 1
