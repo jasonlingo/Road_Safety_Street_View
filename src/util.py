@@ -137,6 +137,9 @@ def makeDirectory(directory):
     """
     if not os.path.exists(directory):
         os.makedirs(directory)
+    else:
+        sys.stderr.write("Dirctory already exists!")
+        exit(1)
 
 
 def readPointFile(filename):
