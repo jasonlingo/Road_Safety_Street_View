@@ -1,9 +1,5 @@
 import random
-from settings import SAMPLE_NUM
-from settings import STREET_VIEW_DIRECTORY
-from settings import CSV_FILENAME
-from settings import INIT_PICTURE_NUM
-from config import HEADINGS
+from config import CONFIG
 from csv_utils import outputCSV
 from util import readPointFile
 from util import makeDirectory
@@ -11,6 +7,53 @@ from util import Progress
 from util import plotSampledPointMap
 from googleStreetView import GoogleStreetView
 from googleDrive import GDriveUpload
+
+
+def sampling():
+    """
+    The main function of the sampling process.
+    :return:
+    """
+    # make directory for street images
+    streetImageOutputFolder = CONFIG["sampling"]["streetImageOutputFolder"]
+    makeDirectory(streetImageOutputFolder)
+
+    # Get preprocessed point data
+    intersectionPointFile = CONFIG["shapefile"]["intersectoinPointFile"]
+    pointInfoFile = CONFIG["shapefile"]["pointInfoFilename"]
+
+    pointInfo = readPointFile(pointInfoFile)
+    intersectionPointInfo = readIntersectionPointInfo(intersectionPointFile)
+
+    # Filter point data that has street images taken within the specified period.
+    maxYear = CONFIG["gmap"]["streetImageMaxYear"]
+    minYear = CONFIG["gmap"]["streetImageMinYear"]
+    filteredPoints = filterPointByYear(pointInfo, maxYear, minYear)
+
+    IMG_NAME_COL_NUM = 5
+    LAT_LNG_COL_NUM = 2
+
+    # Sample street images, the return is list of sample info
+    sampleNum = CONFIG["sampling"]["sampleNum"]
+    initImageNumber = CONFIG["sampling"]["initImageNumber"]
+    sampleData = sampleAndDownloadStreetImage(filteredPoints, sampleNum, initImageNumber, initImageNumber, streetImageOutputFolder, intersectionPointInfo)
+    imageNames = [streetImageOutputFolder + "/" + data[IMG_NAME_COL_NUM] for data in sampleData]
+    links = GDriveUpload(imageNames, "Sampled_Image")
+
+    for i in xrange(len(sampleData)):
+        imageName = streetImageOutputFolder + "/" + sampleData[i][IMG_NAME_COL_NUM]
+        sampleData[i].append(links[imageName])
+
+    columnTitle = ["Sample Number", "Sampled Point Number", "Latitude + Longitude", "Heading", "Date", "Image Name", "Road Types", "Web Link"]
+    sampleData.insert(0, columnTitle)
+
+    # output to csv file
+    outputCSV(sampleData, CONFIG["sampling"]["csvFilename"])
+
+    # plot images map
+    sampledPoints = set([divideGPS(d[LAT_LNG_COL_NUM]) for d in sampleData[1:]])
+    plotSampledPointMap(list(sampledPoints), CONFIG["sampling"]["sampledPointsMapFilename"])
+
 
 def getValidEndPointFromFile(roadTypes):
     validEndPoints = []
@@ -31,10 +74,10 @@ def sampleAndDownloadStreetImage(endPoints, sampleNum, picNum, ptrNum, targetDir
     sampledPoints = random.sample(endPoints, sampleNum) if sampleNum < len(endPoints) else endPoints
     sampleData = []  # store (picture number, file name, lat and lng)
     progress = Progress(10)
-    sampleNumDelta = len(HEADINGS)
+    headings = CONFIG["gmap"]["headings"]
+    sampleNumDelta = len(headings)
     for point in sampledPoints:
         progress.printProgress()
-
         result = downloadSurroundingStreetView(point, targetDirectory, picNum, ptrNum, intersectionPointInfo)
         sampleData += result
         picNum += sampleNumDelta
@@ -50,9 +93,8 @@ def downloadSurroundingStreetView(point, directory, picNum, ptrNum, intersection
     :param point: (float, float) longitude and latitude
     :param directory: the directory for saving the images
     """
-    # googleMapAddr = "https://www.google.com/maps/@%s,%s,15z"
     result = []
-    for heading in HEADINGS:
+    for heading in CONFIG["gmap"]["headings"]:
         filename = "%s/%010d_%s_%s_%s.jpg" % (directory, picNum, str(point[1]), str(point[0]), heading[0])
         paramDict = GoogleStreetView.makeParameterDict(point[1], point[0], heading[1])
         metadata = GoogleStreetView.getMetadata(paramDict)
@@ -73,8 +115,14 @@ def downloadSurroundingStreetView(point, directory, picNum, ptrNum, intersection
 
 
 def readPointFile(filename):
-    # 100.619244706,13.8110460033==Actual Location:100.61920895,13.8114677028|date:2015-12
+    """
+    The point information is retrieve from Google street view metadata API.
+    Load points info from a file. Format is like
+    100.619244706,13.8110460033==Actual Location:100.61920895,13.8114677028|date:2015-12
 
+    :param filename: points filename
+    :return: a dictionary of geography points and it information
+    """
     pointInfo = {}
     f = open(filename, 'r')
     for data in f.readlines():
@@ -124,43 +172,6 @@ def filterPointByYear(pointInfo, maxYear, minYear):
 def divideGPS(point):
     lat, lng = point.split(",")
     return (float(lng), float(lat))
-
-
-def sampling():
-    intersectionPointFile = "../validIntersectionPoints_nonduplicate.data"
-    pointInfoFile = "../point_info.data"
-
-    pointInfo = readPointFile(pointInfoFile)
-    intersectionPointInfo = readIntersectionPointInfo(intersectionPointFile)
-
-    maxYear = 2012
-    minYear = 2011
-    filteredPoints = filterPointByYear(pointInfo, maxYear, minYear)
-
-    # make directory for street images
-    makeDirectory(STREET_VIEW_DIRECTORY)
-
-    IMG_NAME_COL_NUM = 5
-    LAT_LNG_COL_NUM = 2
-
-    # Sample street images, the return is list of sample info
-    sampleData = sampleAndDownloadStreetImage(filteredPoints, SAMPLE_NUM, INIT_PICTURE_NUM, INIT_PICTURE_NUM, STREET_VIEW_DIRECTORY, intersectionPointInfo)
-    imageNames = [STREET_VIEW_DIRECTORY + "/" + data[IMG_NAME_COL_NUM] for data in sampleData]
-    links = GDriveUpload(imageNames, "Sampled_Image")
-
-    for i in xrange(len(sampleData)):
-        imageName = STREET_VIEW_DIRECTORY + "/" + sampleData[i][IMG_NAME_COL_NUM]
-        sampleData[i].append(links[imageName])
-
-    columnTitle = ["Sample Number", "Sampled Point Number", "Latitude + Longitude", "Heading", "Date", "Image Name", "Road Types", "Web Link"]
-    sampleData.insert(0, columnTitle)
-
-    # output to csv file
-    outputCSV(sampleData, CSV_FILENAME)
-
-    # plot images map
-    sampledPoints = set([divideGPS(d[LAT_LNG_COL_NUM]) for d in sampleData[1:]])
-    plotSampledPointMap(list(sampledPoints), STREET_VIEW_DIRECTORY + "/map")
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ import json
 import requests
 import time
 from collections import namedtuple
-from settings import GOOGLE_API_KEY
+from config import CONFIG
 
 
 class GoogleStreetView(object):
@@ -12,6 +12,7 @@ class GoogleStreetView(object):
     StreetViewParam = namedtuple("StreetViewParam", ["lat", "lng", "heading", "pov", "pitch"])
 
     # the api request address
+    GOOGLE_API_KEY = CONFIG["gmap"]["apiKey"]
     STREET_IMAGE_API = "https://maps.googleapis.com/maps/api/streetview?" \
                              "size=640x640&" \
                              "location=%f,%f&" \
@@ -73,7 +74,7 @@ class GoogleStreetView(object):
             heading=str(heading),
             fov=str(fov),
             pitch=str(pitch),
-            key=GOOGLE_API_KEY
+            key=cls.GOOGLE_API_KEY
         )
         return params
 

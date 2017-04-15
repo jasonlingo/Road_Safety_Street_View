@@ -1,10 +1,15 @@
 from __future__ import division
+"""
+Used to find intersections from a shapefile that don't provide the intersection
+information.
+"""
+
 
 import sys
 import math
 import time
 import pygmaps
-from config import HEADINGS
+from config import CONFIG
 from shapefileUtil import ShapeFileParser
 from shapefileUtil import ShapeType
 from googleStreetView import GoogleStreetView
@@ -17,6 +22,7 @@ from pathSegment import getMinMaxLatLng
 from drawShapefile import createMapHtmlandOpen
 
 COLORS = ["#ff3300", "#3333ff", "#0000", "#ff00ff", "#00e600", "#ff9900", "#66c2ff", "#ffff00"]
+
 
 def findIntersection(allPaths, allSegments, regionNum):
     """
@@ -177,10 +183,11 @@ def findValidIntersections(intersections):
     msg = "Starting record = %d" % start
     Logger.printAndWrite(msg)
 
+    headingZero = CONFIG["gmap"]["headings"][0]
     validIntersections = {}
     i = 0
     for point in intersections.keys()[start:start + delta]:
-        param = GoogleStreetView.makeParameterDict(point[1], point[0], HEADINGS[0])
+        param = GoogleStreetView.makeParameterDict(point[1], point[0], headingZero)
         if GoogleStreetView.isValidPoint(param):
             validIntersections[point] = intersections[point]
         i += 1

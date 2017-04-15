@@ -1,6 +1,6 @@
 import shapefile as shp
-from settings import SHAPE_TYPE_INDEX
 from pathSegment import Path
+from config import CONFIG
 
 
 class ShapeType(object):
@@ -88,7 +88,7 @@ class ShapeFileParser(object):
         :param shapeTypeIdx: (int) the index of the type store in the shape file
         """
         self.shapefile = shapefile
-        self.shapeTypeIdx = SHAPE_TYPE_INDEX
+        self.shapeTypeIdx = CONFIG["shapefile"]["shapeTypeIndex"]
         self.intersections = None
         self.shapeReader = shp.Reader(shapefile)
 

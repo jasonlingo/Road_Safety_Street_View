@@ -1,17 +1,9 @@
+"""
+These functions are used to plot the points on google map by years or road types.
+"""
+
 from util import plotSampledPointMap
-
-
-def readPointAndType(filename):
-    f = open(filename, 'r')
-    typePoints = {}
-    for line in f.readlines():
-        data = line.strip("\n").split("|")
-        for type in data[1:]:
-            if type not in typePoints:
-                typePoints[type] = set()
-            typePoints[type].add(data[0])
-    f.close()
-    return typePoints
+from config import CONFIG
 
 
 def readDatePoints(filename):
@@ -32,6 +24,24 @@ def getDate(info):
     return tuple([d for d in yearMonth])
 
 
+def readPointAndType(filename):
+    """
+    Read point data and return them by road types.
+    :param filename:
+    :return: a dictionary of {type: set of points of the type}
+    """
+    f = open(filename, 'r')
+    typePoints = {}
+    for line in f.readlines():
+        data = line.strip("\n").split("|")
+        for type in data[1:]:
+            if type not in typePoints:
+                typePoints[type] = set()
+            typePoints[type].add(data[0])
+    f.close()
+    return typePoints
+
+
 def convertPoints(pointStrs):
     points = []
     for pointStr in pointStrs:
@@ -39,17 +49,19 @@ def convertPoints(pointStrs):
         points.append((float(point[0]), float(point[1])))
     return points
 
+
+
 if __name__ == "__main__":
-
     # get point date
-    yearPoints = readDatePoints("../point_info.data")
+    pointInfoFilename = CONFIG["shapefile"]["pointInfoFilename"]
+    yearPoints = readDatePoints(pointInfoFilename)
 
-    total = 0
+    totalPointNum = 0
     for year in yearPoints:
         points = convertPoints(yearPoints[year])
         plotSampledPointMap(points, year)
         print year, len(yearPoints[year])
-        total += len(yearPoints[year])
-    print "total=", total
+        totalPointNum += len(yearPoints[year])
+    print "total=", totalPointNum
 
 

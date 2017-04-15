@@ -12,7 +12,8 @@ from googleapiclient.http import MediaFileUpload
 from oauth2client.file import Storage
 from oauth2client import client
 from oauth2client import tools
-from settings import CLIENT_SECRET_FILE
+
+from config import CONFIG
 
 APPLICATION_NAME = 'Drive API'
 try:
@@ -110,8 +111,9 @@ def get_credentials():
 
     store = Storage(credential_path)
     credentials = store.get()
+    clientSecretFile = CONFIG["gdrive"]["clientSecretPath"]
     if not credentials or credentials.invalid:
-        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, OAUTH_SCOPE)
+        flow = client.flow_from_clientsecrets(clientSecretFile, OAUTH_SCOPE)
         flow.user_agent = APPLICATION_NAME
         if flags:
             credentials = tools.run_flow(flow, store, flags)

@@ -1,3 +1,8 @@
+"""
+These functions are used to draw the map according to a shape file.
+However, it is currently broken. Can use http://mapshaper.org/ to draw the shapefile.
+"""
+
 import os
 import sys
 import webbrowser
@@ -5,6 +10,7 @@ import pygmaps
 from shapefileUtil import ShapeFileParser
 from shapefileUtil import ShapeType
 from util import CustomedProgress
+from config import CONFIG
 
 
 def drawShapefile(filename):
@@ -37,7 +43,6 @@ def plotMap(allPaths):
         pathPoint = getPath(path)
         myMap.addpath(pathPoint, colors[colorIdx])
         colorIdx = (colorIdx + 1) % len(colors)
-
 
     # create map file
     mapFilename = "allPath.html"
@@ -89,4 +94,5 @@ def createMapHtmlandOpen(myMap, mapFilename):
 
 
 if __name__=="__main__":
-    filename = "../shapefile/Bangkok-shp/shape/roads.shp"
+    filename = CONFIG["shapefile"]["filePath"]
+    drawShapefile(filename)
