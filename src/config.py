@@ -1,4 +1,8 @@
-# Google Street view headings
-HEADINGS = [["N", 0], ["E", 90], ["S", 180], ["W", 270]]
+import yaml
 
-EARTH_RADIUS_KM = 6371.0
+with open("../config/config.yaml") as stream:
+    try:
+        CONFIG = yaml.safe_load(stream)
+    except yaml.YAMLError as exc:
+        print "Loading config file failed!"
+        raise

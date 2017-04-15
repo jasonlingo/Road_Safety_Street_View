@@ -1,9 +1,9 @@
 from shapefileUtil import ShapeFileParser
 from shapefileUtil import ShapeType
-from settings import SHAPE_FILE
-from main import getEndPoint
-from main import getValidEndPoint
-from main import removeDuplicatePoint
+from config import CONFIG
+from util import getEndPoint
+from util import getValidEndPoint
+from util import removeDuplicatePoint
 
 
 def preprocessEndPoints(types):
@@ -11,10 +11,11 @@ def preprocessEndPoints(types):
     Parse the shape file, get the target road types data and store the valid end points to files.
     :param types: list of road types
     """
+    shapefile = CONFIG["shapefile"]["filePath"]
     for type in types:
         print "======================="
         print "processing", type
-        shapefile = ShapeFileParser(SHAPE_FILE)
+        shapefile = ShapeFileParser(shapefile)
 
         print "parsing shape file"
         paths = shapefile.getShapeTypePath([type])

@@ -4,11 +4,15 @@ import pygmaps
 import webbrowser
 import numpy as np
 from math import sin, radians, cos, asin, sqrt, atan2, pi
-from config import HEADINGS
-from config import EARTH_RADIUS_KM
 from googleStreetView import GoogleStreetView
+from config import CONFIG
+
+EARTH_RADIUS_KM = 6371.0
 
 class CustomedProgress(object):
+    """
+    Used to print the progress for a long-running process.
+    """
 
     def __init__(self):
         self.count = 0
@@ -78,7 +82,8 @@ def isValidPoint(point):
     of the street view image for the given point.
     :return:
     """
-    params = GoogleStreetView.makeParameterDict(point[1], point[0], HEADINGS[0][1])
+    headings = CONFIG["gmap"]["headings"]
+    params = GoogleStreetView.makeParameterDict(point[1], point[0], headings[0][1])
     return GoogleStreetView.isValidPoint(params)
 
 
@@ -122,7 +127,7 @@ def plotSampledPointMap(points, mapName):
         myMap.addpoint(point[1], point[0], "b")
 
     # create map file
-    mapFilename = "%s.html" % mapName
+    mapFilename = "../data/%s.html" % mapName
     myMap.draw('./' + mapFilename)
 
     # Open the map file on a web browser.
@@ -137,7 +142,7 @@ def makeDirectory(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
     else:
-        sys.stderr.write("Dirctory already exists!")
+        sys.stderr.write("Dirctory [%s] already exists!" % directory)
         exit(1)
 
 

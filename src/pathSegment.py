@@ -1,8 +1,8 @@
 from __future__ import division
 import sys
 from util import calcVectAngle
-from settings import PATH_DEGREE
 from util import haversine
+from config import CONFIG
 
 
 class Intersection(object):
@@ -76,7 +76,7 @@ class PathSegment(object):
         return (x, y)
 
 
-
+PATH_DEGREE = CONFIG["intersection"]["pathDegree"]
 LIMIT_ANGLE1 = PATH_DEGREE
 LIMIT_ANGLE2 = 360 - PATH_DEGREE
 LIMIT_ANGLE3 = 180 - PATH_DEGREE
