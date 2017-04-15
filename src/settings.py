@@ -1,10 +1,7 @@
 
 # ===== Google API ==================================================
-GOOGLE_API_KEY = "AIzaSyDBni3ing7ysqOkGN-E_c82SdDDvtpVdXg"
+GOOGLE_API_KEY = "AIzaSyCLP5d5vcwI1dY_2uLLYu17_3Itf4FWH_I"
 """Google Maps api key"""
-
-NO_IMAGE_FILE_NAME = "../img/NO_IMAGE.jpg"
-"""The image replied by Google Street View API when there is no image for the request."""
 
 CLIENT_ID = "1078817381252-4tpe82e7k8r18sucmc9jq5d63pvqi1i6.apps.googleusercontent.com"
 
@@ -23,7 +20,7 @@ STREET_VIEW_DIRECTORY = "../street_views"
 CSV_FILENAME = STREET_VIEW_DIRECTORY + "/samples.csv"
 
 # ===== Settings ====================================================
-SAMPLE_NUM = 1500
+SAMPLE_NUM = 10
 """total number of samples"""
 
 INIT_PICTURE_NUM = 1
