@@ -1,6 +1,5 @@
 import csv
 
-
 def outputCSV(dataset, filename):
     """
     Output dataSet to a csv file

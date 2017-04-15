@@ -27,7 +27,7 @@ def sampleAndDownloadStreetImage(endPoints, sampleNum, picNum, ptrNum, targetDir
     to get the street view images.
     :return:
     """
-    print "download street images..."
+    print "downloading street images..."
     sampledPoints = random.sample(endPoints, sampleNum) if sampleNum < len(endPoints) else endPoints
     sampleData = []  # store (picture number, file name, lat and lng)
     progress = Progress(10)

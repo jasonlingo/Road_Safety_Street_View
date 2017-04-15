@@ -16,11 +16,7 @@ from pathSegment import getSegmentPoint
 from pathSegment import getMinMaxLatLng
 from drawShapefile import createMapHtmlandOpen
 
-
-
 COLORS = ["#ff3300", "#3333ff", "#0000", "#ff00ff", "#00e600", "#ff9900", "#66c2ff", "#ffff00"]
-
-
 
 def findIntersection(allPaths, allSegments, regionNum):
     """

@@ -8,7 +8,6 @@ from config import HEADINGS
 from config import EARTH_RADIUS_KM
 from googleStreetView import GoogleStreetView
 
-
 class CustomedProgress(object):
 
     def __init__(self):

@@ -1,4 +1,3 @@
-import random
 import sys
 from googleStreetView import GoogleStreetView
 from config import HEADINGS

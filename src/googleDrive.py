@@ -1,10 +1,11 @@
-#!/usr/bin/python
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import httplib2
 import datetime
+import time
+
 from apiclient import errors
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -12,7 +13,6 @@ from oauth2client.file import Storage
 from oauth2client import client
 from oauth2client import tools
 from settings import CLIENT_SECRET_FILE
-
 
 APPLICATION_NAME = 'Drive API'
 try:
@@ -71,14 +71,23 @@ def GDriveUpload(imageList, folderName):
     # Upload images to Google Drive.
     links = {}
     for image in imageList:
-        # Upload images.
-        # insert_file( drive service, image name, description, folder id on Google Drive, media type, the address of the image)
-        file = insert_file(drive_service, image.split("/")[-1], "video frame of road", folder_id, 'image/jpeg', image)
-        print image + " uploaded!"
+        try:
+            # Upload images.
+            # insert_file( drive service, image name, description, folder id on Google Drive, media type, the address of the image)
+            file = insert_file(drive_service, image.split("/")[-1], "street view image", folder_id, 'image/jpeg', image)
+            while file is None:
+                print "sleep for one second"
+                time.sleep(1)
+                file = insert_file(drive_service, image.split("/")[-1], "street view image", folder_id, 'image/jpeg', image)
 
-        # Get the public web link of the uploaded image.
-        templink = file['webContentLink'].strip().split("&")[0]
-        links[image] = templink
+            print image + " uploaded!"
+
+            # Get the public web link of the uploaded image.
+            templink = file['webContentLink'].strip().split("&")[0]
+            links[image] = templink
+        except:
+            print file
+
 
     return links
 
